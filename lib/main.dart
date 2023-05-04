@@ -1,7 +1,11 @@
-import 'package:firebase_core/firebase_core.dart';
+import 'dart:io';
+
+import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:todo_app/services/hive_service.dart';
 import 'views/home.dart';
 import 'package:flutter/services.dart';
+import 'package:todo_app/services/settings_service.dart';
 
 Future main() async {
   SystemChrome.setSystemUIOverlayStyle(
@@ -11,7 +15,14 @@ Future main() async {
     ),
   );
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+
+  // init hive
+  HiveService().init();
+
+  // get temp dir
+  Directory directory = await getTemporaryDirectory();
+  Settings().setDirectory(directory);
+
   runApp(const ToDoApp());
 }
 

@@ -1,15 +1,20 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:todo_app/services/api_service.dart';
 
 class UpdateTaskAlertDialog extends StatefulWidget {
-  final String taskId, taskName, taskDesc, taskTag;
+  final int taskId;
+  final String taskName;
+  final bool taskStatus;
 
-  const UpdateTaskAlertDialog(
-      {Key? Key, required this.taskId, required this.taskName, required this.taskDesc, required this.taskTag})
-      : super(key: Key);
+  const UpdateTaskAlertDialog({
+    Key? Key,
+    required this.taskId,
+    required this.taskName,
+    required this.taskStatus,
+  }) : super(key: Key);
 
   @override
   State<UpdateTaskAlertDialog> createState() => _UpdateTaskAlertDialogState();
@@ -17,14 +22,12 @@ class UpdateTaskAlertDialog extends StatefulWidget {
 
 class _UpdateTaskAlertDialogState extends State<UpdateTaskAlertDialog> {
   final TextEditingController taskNameController = TextEditingController();
-  final TextEditingController taskDescController = TextEditingController();
-  final List<String> taskTags = ['Work', 'School', 'Other'];
-  String selectedValue = '';
+  bool selectedValue = false;
 
   @override
   Widget build(BuildContext context) {
     taskNameController.text = widget.taskName;
-    taskDescController.text = widget.taskDesc;
+    selectedValue = widget.taskStatus;
 
     var width = MediaQuery.of(context).size.width;
     var height = MediaQuery.of(context).size.height;
@@ -49,24 +52,8 @@ class _UpdateTaskAlertDialogState extends State<UpdateTaskAlertDialog> {
                     horizontal: 20,
                     vertical: 20,
                   ),
-                  icon: const Icon(CupertinoIcons.square_list, color: Colors.brown),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 15),
-              TextFormField(
-                controller: taskDescController,
-                keyboardType: TextInputType.multiline,
-                maxLines: null,
-                style: const TextStyle(fontSize: 14),
-                decoration: InputDecoration(
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 20,
-                  ),
-                  icon: const Icon(CupertinoIcons.bubble_left_bubble_right, color: Colors.brown),
+                  icon: const Icon(CupertinoIcons.square_list,
+                      color: Colors.brown),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),
@@ -87,26 +74,33 @@ class _UpdateTaskAlertDialogState extends State<UpdateTaskAlertDialog> {
                         ),
                       ),
                       isExpanded: true,
-                      value: widget.taskTag,
+                      value: widget.taskStatus,
                       buttonHeight: 60,
                       buttonPadding: const EdgeInsets.only(left: 20, right: 10),
                       dropdownDecoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(15),
                       ),
-                      items: taskTags
-                          .map(
-                            (item) => DropdownMenuItem<String>(
-                              value: item,
-                              child: Text(
-                                item,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                ),
-                              ),
+                      items: const [
+                        DropdownMenuItem<bool>(
+                          value: true,
+                          child: Text(
+                            "Done?",
+                            style: TextStyle(
+                              fontSize: 14,
                             ),
-                          )
-                          .toList(),
-                      onChanged: (String? value) => setState(
+                          ),
+                        ),
+                        DropdownMenuItem<bool>(
+                          value: false,
+                          child: Text(
+                            "Not Done?",
+                            style: TextStyle(
+                              fontSize: 14,
+                            ),
+                          ),
+                        )
+                      ],
+                      onChanged: (bool? value) => setState(
                         () {
                           if (value != null) selectedValue = value;
                         },
@@ -132,10 +126,8 @@ class _UpdateTaskAlertDialogState extends State<UpdateTaskAlertDialog> {
         ElevatedButton(
           onPressed: () {
             final taskName = taskNameController.text;
-            final taskDesc = taskDescController.text;
-            var taskTag = '';
-            selectedValue == '' ? taskTag = widget.taskTag : taskTag = selectedValue;
-            _updateTasks(taskName, taskDesc, taskTag);
+            bool taskStatus = selectedValue;
+            _updateTasks(taskName, taskStatus);
             Navigator.of(context, rootNavigator: true).pop();
           },
           child: const Text('Update'),
@@ -144,11 +136,11 @@ class _UpdateTaskAlertDialogState extends State<UpdateTaskAlertDialog> {
     );
   }
 
-  Future _updateTasks(String taskName, String taskDesc, String taskTag) async {
-    var collection = FirebaseFirestore.instance.collection('tasks');
-    collection
-        .doc(widget.taskId)
-        .update({'taskName': taskName, 'taskDesc': taskDesc, 'taskTag': taskTag})
+  Future _updateTasks(String taskName, bool taskStatus) async {
+    Api.patch("todos/${widget.taskId}", data: {
+      'title': taskName,
+      'completed': taskStatus,
+    })
         .then(
           (_) => Fluttertoast.showToast(
               msg: "Task updated successfully",

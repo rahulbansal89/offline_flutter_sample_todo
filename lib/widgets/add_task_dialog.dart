@@ -1,7 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:todo_app/services/api_service.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 
 class AddTaskAlertDialog extends StatefulWidget {
   const AddTaskAlertDialog({
@@ -14,9 +14,7 @@ class AddTaskAlertDialog extends StatefulWidget {
 
 class _AddTaskAlertDialogState extends State<AddTaskAlertDialog> {
   final TextEditingController taskNameController = TextEditingController();
-  final TextEditingController taskDescController = TextEditingController();
-  final List<String> taskTags = ['Work', 'School', 'Other'];
-  late String selectedValue = '';
+  bool selectedValue = false;
 
   @override
   Widget build(BuildContext context) {
@@ -45,26 +43,8 @@ class _AddTaskAlertDialogState extends State<AddTaskAlertDialog> {
                   ),
                   hintText: 'Task',
                   hintStyle: const TextStyle(fontSize: 14),
-                  icon: const Icon(CupertinoIcons.square_list, color: Colors.brown),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 15),
-              TextFormField(
-                controller: taskDescController,
-                keyboardType: TextInputType.multiline,
-                maxLines: null,
-                style: const TextStyle(fontSize: 14),
-                decoration: InputDecoration(
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 20,
-                  ),
-                  hintText: 'Description',
-                  hintStyle: const TextStyle(fontSize: 14),
-                  icon: const Icon(CupertinoIcons.bubble_left_bubble_right, color: Colors.brown),
+                  icon: const Icon(CupertinoIcons.square_list,
+                      color: Colors.brown),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),
@@ -85,31 +65,34 @@ class _AddTaskAlertDialogState extends State<AddTaskAlertDialog> {
                         ),
                       ),
                       isExpanded: true,
-                      hint: const Text(
-                        'Add a task tag',
-                        style: TextStyle(fontSize: 14),
-                      ),
+                      value: selectedValue,
                       buttonHeight: 60,
                       buttonPadding: const EdgeInsets.only(left: 20, right: 10),
                       dropdownDecoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(15),
                       ),
-                      // validator: (value) => value == null
-                      //     ? 'Please select the task tag' : null,
-                      items: taskTags
-                          .map(
-                            (item) => DropdownMenuItem<String>(
-                              value: item,
-                              child: Text(
-                                item,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                ),
-                              ),
+                      items: const [
+                        DropdownMenuItem<bool>(
+                          value: true,
+                          child: Text(
+                            "Done?",
+                            style: TextStyle(
+                              fontSize: 14,
                             ),
-                          )
-                          .toList(),
-                      onChanged: (String? value) => setState(() {
+                          ),
+                        ),
+                        DropdownMenuItem<bool>(
+                          value: false,
+                          child: Text(
+                            "Not Done?",
+                            style: TextStyle(
+                              fontSize: 14,
+                            ),
+                          ),
+                        )
+                      ],
+                      onChanged: (bool? value) => setState(
+                        () {
                           if (value != null) selectedValue = value;
                         },
                       ),
@@ -134,9 +117,11 @@ class _AddTaskAlertDialogState extends State<AddTaskAlertDialog> {
         ElevatedButton(
           onPressed: () {
             final taskName = taskNameController.text;
-            final taskDesc = taskDescController.text;
-            final taskTag = selectedValue;
-            _addTasks(taskName: taskName, taskDesc: taskDesc, taskTag: taskTag);
+            bool taskStatus = selectedValue;
+            _addTasks(
+              taskName: taskName,
+              taskStatus: taskStatus,
+            );
             Navigator.of(context, rootNavigator: true).pop();
           },
           child: const Text('Save'),
@@ -145,23 +130,21 @@ class _AddTaskAlertDialogState extends State<AddTaskAlertDialog> {
     );
   }
 
-  Future _addTasks({required String taskName, required String taskDesc, required String taskTag}) async {
-    DocumentReference docRef = await FirebaseFirestore.instance.collection('tasks').add(
-      {
-        'taskName': taskName,
-        'taskDesc': taskDesc,
-        'taskTag': taskTag,
+  Future _addTasks({
+    required String taskName,
+    required bool taskStatus,
+  }) async {
+    await Api.post(
+      "todos",
+      data: {
+        'title': taskName,
+        'completed': taskStatus,
       },
-    );
-    String taskId = docRef.id;
-    await FirebaseFirestore.instance.collection('tasks').doc(taskId).update(
-      {'id': taskId},
     );
     _clearAll();
   }
 
   void _clearAll() {
     taskNameController.text = '';
-    taskDescController.text = '';
   }
 }

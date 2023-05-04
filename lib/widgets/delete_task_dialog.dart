@@ -1,11 +1,16 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:todo_app/services/api_service.dart';
 
 class DeleteTaskDialog extends StatefulWidget {
-  final String taskId, taskName;
+  final int taskId;
+  final String taskName;
 
-  const DeleteTaskDialog({Key? key, required this.taskId, required this.taskName}) : super(key: key);
+  const DeleteTaskDialog({
+    Key? key,
+    required this.taskId,
+    required this.taskName,
+  }) : super(key: key);
 
   @override
   State<DeleteTaskDialog> createState() => _DeleteTaskDialogState();
@@ -32,7 +37,8 @@ class _DeleteTaskDialogState extends State<DeleteTaskDialog> {
               const SizedBox(height: 15),
               Text(
                 widget.taskName.toString(),
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 15),
             ],
@@ -64,10 +70,7 @@ class _DeleteTaskDialogState extends State<DeleteTaskDialog> {
   }
 
   Future _deleteTasks() async {
-    var collection = FirebaseFirestore.instance.collection('tasks');
-    collection
-        .doc(widget.taskId)
-        .delete()
+    Api.delete('todos/${widget.taskId}')
         .then(
           (_) => Fluttertoast.showToast(
               msg: "Task deleted successfully",
