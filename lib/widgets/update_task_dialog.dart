@@ -8,12 +8,14 @@ class UpdateTaskAlertDialog extends StatefulWidget {
   final int taskId;
   final String taskName;
   final bool taskStatus;
+  final Function? onClose;
 
   const UpdateTaskAlertDialog({
     Key? Key,
     required this.taskId,
     required this.taskName,
     required this.taskStatus,
+    this.onClose,
   }) : super(key: Key);
 
   @override
@@ -128,6 +130,9 @@ class _UpdateTaskAlertDialogState extends State<UpdateTaskAlertDialog> {
             final taskName = taskNameController.text;
             bool taskStatus = selectedValue;
             _updateTasks(taskName, taskStatus);
+            if (widget.onClose != null) {
+              widget.onClose!();
+            }
             Navigator.of(context, rootNavigator: true).pop();
           },
           child: const Text('Update'),
@@ -137,7 +142,7 @@ class _UpdateTaskAlertDialogState extends State<UpdateTaskAlertDialog> {
   }
 
   Future _updateTasks(String taskName, bool taskStatus) async {
-    Api.patch("todos/${widget.taskId}", data: {
+    Api.patch("tasks/${widget.taskId}", data: {
       'title': taskName,
       'completed': taskStatus,
     })

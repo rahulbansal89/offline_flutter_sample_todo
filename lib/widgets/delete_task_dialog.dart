@@ -5,11 +5,13 @@ import 'package:todo_app/services/api_service.dart';
 class DeleteTaskDialog extends StatefulWidget {
   final int taskId;
   final String taskName;
+  final Function? onClose;
 
   const DeleteTaskDialog({
     Key? key,
     required this.taskId,
     required this.taskName,
+    this.onClose,
   }) : super(key: key);
 
   @override
@@ -58,6 +60,9 @@ class _DeleteTaskDialogState extends State<DeleteTaskDialog> {
         ElevatedButton(
           onPressed: () {
             _deleteTasks();
+            if (widget.onClose != null) {
+              widget.onClose!();
+            }
             Navigator.of(context, rootNavigator: true).pop();
           },
           style: ElevatedButton.styleFrom(
@@ -70,7 +75,7 @@ class _DeleteTaskDialogState extends State<DeleteTaskDialog> {
   }
 
   Future _deleteTasks() async {
-    Api.delete('todos/${widget.taskId}')
+    Api.delete('tasks/${widget.taskId}')
         .then(
           (_) => Fluttertoast.showToast(
               msg: "Task deleted successfully",

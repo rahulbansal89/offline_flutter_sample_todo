@@ -1,9 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:todo_app/services/api_service.dart';
 import 'package:todo_app/services/hive_service.dart';
-import '../widgets/add_task_dialog.dart';
 import 'tasks.dart';
 import 'categories.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -82,18 +80,6 @@ class _HomeScreenState extends State<HomeScreen> {
         // ],
       ),
       extendBody: true,
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return const AddTaskAlertDialog();
-            },
-          );
-        },
-        child: const Icon(Icons.add),
-      ),
       // bottomNavigationBar: BottomAppBar(
       //   shape: const CircularNotchedRectangle(),
       //   notchMargin: 6.0,

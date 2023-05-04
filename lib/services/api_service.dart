@@ -111,7 +111,7 @@ class Api {
     DioClient dioClient = DioClient();
     try {
       final Response response = await dioClient.httpClient.get(
-        'https://jsonplaceholder.typicode.com/$url',
+        'https://my-json-server.typicode.com/flutterdata/demo/$url',
       );
 
       return response;
@@ -140,7 +140,7 @@ class Api {
       }
 
       final Response response = await dioClient.httpClient.post(
-        'https://jsonplaceholder.typicode.com/$url',
+        'https://my-json-server.typicode.com/flutterdata/demo/$url',
         data: data,
       );
       return response;
@@ -169,7 +169,7 @@ class Api {
       }
 
       final Response response = await dioClient.httpClient.patch(
-        'https://jsonplaceholder.typicode.com/$url',
+        'https://my-json-server.typicode.com/flutterdata/demo/$url',
         data: data,
       );
       return response;
@@ -193,7 +193,7 @@ class Api {
       }
 
       final Response response = await dioClient.httpClient.delete(
-        'https://jsonplaceholder.typicode.com/$url',
+        'https://my-json-server.typicode.com/flutterdata/demo/$url',
       );
 
       return response;

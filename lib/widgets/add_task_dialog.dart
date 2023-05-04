@@ -4,8 +4,10 @@ import 'package:todo_app/services/api_service.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 
 class AddTaskAlertDialog extends StatefulWidget {
+  final Function? onClose;
   const AddTaskAlertDialog({
     Key? key,
+    this.onClose,
   }) : super(key: key);
 
   @override
@@ -122,6 +124,9 @@ class _AddTaskAlertDialogState extends State<AddTaskAlertDialog> {
               taskName: taskName,
               taskStatus: taskStatus,
             );
+            if (widget.onClose != null) {
+              widget.onClose!();
+            }
             Navigator.of(context, rootNavigator: true).pop();
           },
           child: const Text('Save'),
@@ -135,7 +140,7 @@ class _AddTaskAlertDialogState extends State<AddTaskAlertDialog> {
     required bool taskStatus,
   }) async {
     await Api.post(
-      "todos",
+      "tasks",
       data: {
         'title': taskName,
         'completed': taskStatus,
