@@ -4,11 +4,15 @@ import 'package:hive_flutter/hive_flutter.dart';
 class HiveService {
   static final HiveService _instance = HiveService._internal();
 
-  var box;
+  late Box box;
   String boxName = 'testBox';
 
   factory HiveService() {
     return _instance;
+  }
+
+  Box getBox() {
+    return box;
   }
 
   dynamic putData({

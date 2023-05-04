@@ -1,5 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:todo_app/services/api_service.dart';
+import 'package:todo_app/services/hive_service.dart';
 import '../widgets/add_task_dialog.dart';
 import 'tasks.dart';
 import 'categories.dart';
@@ -29,6 +32,36 @@ class _HomeScreenState extends State<HomeScreen> {
           textColor: Colors.white,
           fontSize: 14.0,
         );
+      } else {
+        // resend any pending requests now
+        try {
+          // get all pending calls
+          Box box = HiveService().getBox();
+          List writeCalls = box.get('writeCalls');
+          List patchCalls = box.get('patchCalls');
+          List delCalls = box.get('delCalls');
+
+          // resend pending calls now
+          writeCalls.forEach((element) {
+            if (element['url'] != null && element['data'] != null) {
+              Api.post(element['url'], data: element['data']);
+            }
+          });
+          patchCalls.forEach((element) {
+            if (element['url'] != null && element['data'] != null) {
+              Api.patch(element['url'], data: element['data']);
+            }
+          });
+          delCalls.forEach((url) {
+            Api.delete(url);
+          });
+
+          // clear all box data now
+          box.clear();
+          print(box.values.toString());
+        } catch (_) {
+          // on error
+        }
       }
     });
 

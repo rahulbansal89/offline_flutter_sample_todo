@@ -7,6 +7,8 @@ import 'package:flutter/foundation.dart';
 import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:dio_cache_interceptor_hive_store/dio_cache_interceptor_hive_store.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:todo_app/services/hive_service.dart';
 import 'package:todo_app/services/settings_service.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -37,7 +39,7 @@ final cacheOptions = CacheOptions(
   keyBuilder: CacheOptions.defaultCacheKeyBuilder,
   // Default. Allows to cache POST requests.
   // Overriding [keyBuilder] is strongly recommended when [true].
-  allowPostMethod: false,
+  allowPostMethod: true,
 );
 
 /// Dio Client gives instance for Dio Http Client
@@ -94,14 +96,6 @@ Future<bool> checkUserConnection() async {
   try {
     var connectivityResult = await (Connectivity().checkConnectivity());
     if (connectivityResult == ConnectivityResult.none) {
-      Fluttertoast.showToast(
-        msg: "No internet connection",
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.SNACKBAR,
-        backgroundColor: Colors.black54,
-        textColor: Colors.white,
-        fontSize: 14.0,
-      );
       return false;
     }
     return true;
@@ -134,6 +128,14 @@ class Api {
     DioClient dioClient = DioClient();
     try {
       if (!await checkUserConnection()) {
+        Box box = HiveService().getBox();
+        List writeCalls = box.get('writeCalls') ?? [];
+        Map writeCall = {
+          'url': url,
+          'data': data,
+        };
+        writeCalls.add(writeCall);
+        box.put('writeCalls', writeCalls);
         return null;
       }
 
@@ -155,6 +157,14 @@ class Api {
     DioClient dioClient = DioClient();
     try {
       if (!await checkUserConnection()) {
+        Box box = HiveService().getBox();
+        List patchCalls = box.get('patchCalls') ?? [];
+        Map patchCall = {
+          'url': url,
+          'data': data,
+        };
+        patchCalls.add(patchCall);
+        box.put('patchCalls', patchCalls);
         return null;
       }
 
@@ -175,6 +185,10 @@ class Api {
     DioClient dioClient = DioClient();
     try {
       if (!await checkUserConnection()) {
+        Box box = HiveService().getBox();
+        List delCalls = box.get('delCalls') ?? [];
+        delCalls.add(url);
+        box.put('delCalls', delCalls);
         return null;
       }
 

@@ -16,12 +16,12 @@ Future main() async {
   );
   WidgetsFlutterBinding.ensureInitialized();
 
-  // init hive
-  HiveService().init();
-
   // get temp dir
   Directory directory = await getTemporaryDirectory();
   Settings().setDirectory(directory);
+
+  // init hive
+  HiveService().init();
 
   runApp(const ToDoApp());
 }
